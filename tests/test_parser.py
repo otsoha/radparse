@@ -1,0 +1,12 @@
+from pathlib import Path
+
+from radparse.parser import main
+
+
+def test_read():
+    path = Path("tests/10092026_FNA_ref_5mg.txt")
+    main(path)
+
+
+if __name__ == "__main__":
+    test_read()
