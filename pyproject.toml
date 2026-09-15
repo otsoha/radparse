@@ -8,11 +8,15 @@ authors = [
     { name = "Otso Häkkänen", email = "otso.hakkanen@aalto.fi"}
     ]
 dependencies = [
+    "numpy>=2.2.6",
+    "pyside6>=6.11.2",
+    "seaborn>=0.13.2",
     "typer>=0.27.2",
 ]
 
 [project.scripts]
-radparse = "radparse:main"
+radparseCLI = "radparse.cli:main_cli"
+radparse = "radparse.gui:main_gui"
 
 [build-system]
 requires = ["uv_build>=0.12.12,<0.13.0"]
@@ -20,5 +24,6 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "pyinstaller>=6.22.2",
     "pytest>=9.1.1",
 ]
