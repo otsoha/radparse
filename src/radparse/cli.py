@@ -1,5 +1,6 @@
-from radparse.parser import parse_and_write
 import typer
+
+from radparse.parser import parse_and_write
 
 
 def main_cli():

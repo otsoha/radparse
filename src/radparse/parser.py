@@ -3,6 +3,7 @@ from collections.abc import Iterator
 from dataclasses import dataclass
 from itertools import zip_longest
 from pathlib import Path
+
 import numpy as np
 
 format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -84,6 +85,31 @@ def parse_LCChromatogram(lstream: Iterator[str]) -> Data:
             "Data line count in AD1 does not match expected number of points"
         )
 
+    # apply the Intensity multiplier
+    metadata = data.mdata
+    # find the Intensity multiplier in the metadata
+    search_str = "Intensity Multiplier"
+    multiplier = None
+    for line in metadata:
+        if search_str in line:
+            line = line.strip()
+            line = line.split("\t")
+            multiplier = float(line[1].replace(",", "."))
+            logger.debug(f"Found Intensity Multiplier: {multiplier}")
+            break
+    if multiplier is None:
+        raise ValueError("Intensity Multiplier not found in metadata")
+    # Apply the multiplier to the data
+    for row in data.data:
+        # apply correction to only the intensity column, which is the second column (index 1)
+        i = 1
+        row[i] = row[i].replace(",", ".")  # convert , to . for float conversion
+        val = float(row[i]) * multiplier
+        # cut to 4 significant figures
+        val = round(val, 4)
+        row[i] = str(val)
+        # convert . to , for consistency.
+        row[i] = row[i].replace(".", ",")
     return data
 
 
@@ -96,6 +122,28 @@ def parse_PDAMultiChromatogram(lstream: Iterator[str]) -> Data:
             "Data line count in LC1 does not match expected number of points"
         )
 
+    # apply the Intensity multiplier
+    metadata = data.mdata
+    # find the Intensity multiplier in the metadata
+    search_str = "Intensity Multiplier"
+    multiplier = None
+    for line in metadata:
+        if search_str in line:
+            line = line.strip()
+            line = line.split("\t")
+            multiplier = float(line[1].replace(",", "."))
+            logger.debug(f"Found Intensity Multiplier: {multiplier}")
+            break
+    if multiplier is None:
+        raise ValueError("Intensity Multiplier not found in metadata")
+    # Apply the multiplier to the data
+    for row in data.data:
+        # apply correction to only the intensity column, which is the second column (index 1)
+        i = 1
+        row[i] = row[i].replace(",", ".")  # convert , to . for float conversion
+        row[i] = str(float(row[i]) * multiplier)
+        # convert . to , for consistency.
+        row[i] = row[i].replace(".", ",")
     return data
 
 
@@ -195,8 +243,8 @@ def parse_and_write(sample_path: Path, blank_path: Path | None) -> str:
         # unzip data into separate lists for each column
         ad1_sample_time, ad1_sample_intensity = zip(*ad1_data_sample)
         ch1_sample_time, ch1_sample_intensity = zip(*ch1_data_sample)
-        ad1_blank_time, ad1_blank_intensity = zip(*ad1_data_blank)
-        ch1_blank_time, ch1_blank_intensity = zip(*ch1_data_blank)
+        _ad1_blank_time, ad1_blank_intensity = zip(*ad1_data_blank)
+        _ch1_blank_time, ch1_blank_intensity = zip(*ch1_data_blank)
 
         # convert intensity values to float for subtraction, substitute , -> .
         ad1_sample_intensity = np.array(

@@ -1,5 +1,7 @@
 import sys
-from PySide6.QtCore import QSize, Qt, QSettings
+from pathlib import Path
+
+from PySide6.QtCore import QSettings, QSize, Qt
 from PySide6.QtGui import QAction, QIcon
 from PySide6.QtWidgets import (
     QApplication,
@@ -12,11 +14,10 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+
 from radparse.parser import (
     parse_and_write,
 )
-from pathlib import Path
-import json
 
 
 class MainWindow(QMainWindow):
